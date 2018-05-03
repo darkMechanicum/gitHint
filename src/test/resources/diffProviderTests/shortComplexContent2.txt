@@ -1,0 +1,29 @@
+import com.peterservice.rtk.dto.request.customer.CustomerHierarchyPostDTO;
+import com.peterservice.rtk.dto.request.skipvalidationv2post.agreement.AgreementAndLinkedPartiesPostDTO;
+import com.peterservice.rtk.dto.response.HierarchyClientAgreementAccountDTO;
+
+    /**
+     * @see HierarchyService#createAndSaveCustomerAgreementAccount(CustomerHierarchyPostDTO)
+     */
+        authUserStubService.authorizationStub(psAuthUser, token, psTxid);
+        HierarchyClientAgreementAccountDTO result = hierarchyService.createAndSaveCustomerAgreementAccount(hierarchyPost.getCustomerHierarchy());
+        // TODO Ручной запуск синхронизации с СSI, скорее всего нужно убрать после починки полной синхронизации на стенде
+        // , но для быстроты просадки данных в CSI скорее всего нужно оставить
+        executor.replicateHierarchyByCustomer(Collections.singletonList(result.getCustomer().getCustomerId()));
+        return result;
+    }
+
+    /**
+     * @see HierarchyService#createAndSaveCustomerAndSubdivisionsHierarchy(CustomerHierarchyPostDTO)
+     */
+    @RequestMapping(path = "/create-client-agreement-account", method = POST)
+    public Object createFullHierarchyForCustomerAndSubdivisions(
+        @RequestHeader(value = "ps-auth-user") String psAuthUser,
+        @RequestHeader(value = "x-ps-token") String token,
+        @RequestHeader(value = "PSTxid") String psTxid,
+        @RequestBody @Valid CustomerAndLinkedPartiesPostDTO hierarchyPost
+    ) {
+        authUserStubService.authorizationStub(psAuthUser, token, psTxid);
+        HierarchyClientAgreementAccountDTO result = hierarchyService.createAndSaveCustomerAndSubdivisionsHierarchy(hierarchyPost.getCustomerHierarchy());
+        // TODO Ручной запуск синхронизации с СSI, скорее всего нужно убрать после починки полной синхронизации на стенде
+        // , но для быстроты просадки данных в CSI скорее всего нужно оставить

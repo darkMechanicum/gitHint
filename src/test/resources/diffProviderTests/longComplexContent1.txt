@@ -1,0 +1,71 @@
+package com.peterservice.rtk.controller;
+
+import com.peterservice.rtk.dto.request.customer.CustomerAndLinkedPartiesPostDTO;
+import com.peterservice.rtk.dto.request.skipvalidationv2post.agreement.AgreementAndLinkedPartiesPostDTO;
+import com.peterservice.rtk.dto.response.HierarchyClientAgreementAccountDTO;
+import com.peterservice.rtk.service.HierarchyService;
+import org.springframework.web.bind.annotation.*;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.Collections;
+
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+
+@RestController(value = "hierarchyRtkController")
+@RequestMapping(path = "/cam-api-rtk-backend/hierarchy")
+public class HierarchyController extends BaseController {
+
+    @Inject
+    private HierarchyService hierarchyService;
+
+    @RequestMapping(path = "/create-client-agreement-account", method = POST)
+    public Object createFullHierarchyForCustomer(
+        @RequestHeader(value = "ps-auth-user") String psAuthUser,
+        @RequestHeader(value = "x-ps-token") String token,
+        @RequestHeader(value = "PSTxid") String psTxid,
+        @RequestBody @Valid CustomerAndLinkedPartiesPostDTO hierarchyPost
+    ) {
+        authUserStubService.authorizationStub(psAuthUser, token, psTxid);
+        HierarchyClientAgreementAccountDTO result = hierarchyService.createAndSaveCustomerAgreementAccount(hierarchyPost);
+        // TODO Ручной запуск синхронизации с СSI, скорее всего нужно убрать после починки полной синхронизации на стенде
+        // , но для быстроты просадки данных в CSI скорее всего нужно оставить
+        executor.replicateHierarchyByCustomer(Collections.singletonList(result.getCustomer().getCustomerId()));
+        return result;
+    }
+
+    @RequestMapping(path = "/{camCustomerId}/create-agreement-account", method = POST)
+    public Object createAgreementsAndAccountsForCustomer(
+        @RequestHeader(value = "ps-auth-user") String psAuthUser,
+        @RequestHeader(value = "x-ps-token") String token,
+        @RequestHeader(value = "PSTxid") String psTxid,
+        @PathVariable Long camCustomerId,
+        @RequestBody @Valid AgreementAndLinkedPartiesPostDTO request
+    ) {
+        authUserStubService.authorizationStub(psAuthUser, token, psTxid);
+        HierarchyClientAgreementAccountDTO result = hierarchyService.createAndSaveAgreementAccount(
+            request, camCustomerId);
+        // TODO Ручной запуск синхронизации с СSI, скорее всего нужно убрать после починки полной синхронизации на стенде
+        // , но для быстроты просадки данных в CSI скорее всего нужно оставить
+        executor.replicateHierarchyByCustomer(Collections.singletonList(result.getCustomer().getCustomerId()));
+        return result;
+    }
+
+
+    @RequestMapping(path = "/test", method = POST)
+    public Object test(
+        @RequestHeader(value = "ps-auth-user") String psAuthUser,
+        @RequestHeader(value = "x-ps-token") String token,
+        @RequestHeader(value = "PSTxid") String psTxid,
+        @RequestBody HierarchyClientAgreementAccountDTO hierarchyPost,
+        HttpServletRequest request, HttpServletResponse response
+    ) {
+        return "ВСЁ ОК! customerId = " + hierarchyPost.getCustomer().getCustomerId() + "; camAgreementId = "
+            + hierarchyPost.getAgreementsHierarchy().get(0).getAgreementAndLinkedPartyRoles().getAgreement().getCamAgreementId()
+            + "; camAccountId = "
+            + new ArrayList<>(hierarchyPost.getAgreementsHierarchy().get(0).getAccountGroups()).get(0).getAccount().getCamAccountId();
+    }
+}
