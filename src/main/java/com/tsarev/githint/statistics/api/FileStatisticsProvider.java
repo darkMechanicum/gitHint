@@ -1,31 +1,51 @@
 package com.tsarev.githint.statistics.api;
 
-import com.tsarev.githint.statistics.common.CommonStatTypes;
 import com.tsarev.githint.vcs.api.ChangedFileContent;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
- * Интерфейс получения сводки по конкретному файлу.
+ * <p>
+ * Interface to collect statistics for changed contents.
+ * Used statistic methods and method keys depends on implementation.
+ * </p>
+ * <p>
+ * For every statistics method there must be a key, to get results
+ * from computed {@link OverallStat}.
+ * </p>
  */
 public interface FileStatisticsProvider<KeyT> {
 
     /**
-     * Получене статистики для файла.
+     * Get statistics for one file.
      */
-    <DataT> StatEntry<CommonStatTypes, DataT> getStatFor(Class<DataT> dataClass,
-                                                         CommonStatTypes statType,
-                                                         ChangedFileContent changed);
+    <DataT> StatEntry<KeyT, DataT> getStatFor(Class<DataT> dataClass,
+                                              KeyT statType,
+                                              ChangedFileContent changed);
 
     /**
-     * Получение статистики для ряда файлов.
+     * Get statistics for changed content list.
      */
-    <DataT> StatEntry<CommonStatTypes, DataT> getStatFor(Class<DataT> dataClass,
-                                                         CommonStatTypes statType,
-                                                         List<ChangedFileContent> changed);
+    <DataT> StatEntry<KeyT, DataT> getStatFor(Class<DataT> dataClass,
+                                              KeyT statType,
+                                              List<ChangedFileContent> changed);
 
     /**
-     * Получение статистики для набора файлов.
+     * Get statistics for changed content stream.
+     * Terminates the stream.
+     */
+    <DataT> StatEntry<KeyT, DataT> getStatFor(Class<DataT> dataClass,
+                                              KeyT statType,
+                                              Stream<ChangedFileContent> changed);
+
+    /**
+     * Get all registered statistics for changed content list.
      */
     OverallStat<KeyT> getAllStatFor(List<ChangedFileContent> changed);
+
+    /**
+     * Get all registered statistics for changed content stream.
+     */
+    OverallStat<KeyT> getAllStatFor(Stream<ChangedFileContent> changed);
 }

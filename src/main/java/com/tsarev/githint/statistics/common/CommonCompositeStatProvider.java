@@ -8,18 +8,26 @@ import com.tsarev.githint.vcs.api.ChangedFileContent;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
- * Простая реализация получения статистики.
+ * Statistics providers implementation based on inner statistics collectors.
+ *
+ * @see StatAccumulator
  */
 public class CommonCompositeStatProvider implements FileStatisticsProvider<CommonStatTypes> {
 
     /**
-     * Зарегистрированные агрегаторы статистики.
+     * Registered statistics accumulators.
      */
     private Map<CommonStatTypes, Supplier<StatAccumulator<CommonStatTypes, ?>>> statConstructors = new HashMap<>();
 
+    // ---- [CommonCompositeStatProvider] Interface methods ------------------------------------------
+
+    /** {@inheritDoc} */
     @Override
     public <DataT> StatEntry<CommonStatTypes, DataT> getStatFor(Class<DataT> dataClass,
                                                                 CommonStatTypes statType,
@@ -29,6 +37,7 @@ public class CommonCompositeStatProvider implements FileStatisticsProvider<Commo
         return accumulator.getStat();
     }
 
+    /** {@inheritDoc} */
     @Override
     public <DataT> StatEntry<CommonStatTypes, DataT> getStatFor(Class<DataT> dataClass,
                                                                 CommonStatTypes statType,
@@ -38,16 +47,45 @@ public class CommonCompositeStatProvider implements FileStatisticsProvider<Commo
         return accumulator.getStat();
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public <DataT> StatEntry<CommonStatTypes, DataT> getStatFor(Class<DataT> dataClass,
+                                                                CommonStatTypes statType,
+                                                                Stream<ChangedFileContent> changed) {
+        StatAccumulator<CommonStatTypes, DataT> accumulator = constructAccumulator(dataClass, statType);
+        // TODO [790658] [08.05.2018] [Aleksandr.Tsarev] Change accumulator to fit Stream API.
+        changed.reduce((o, current) -> {accumulator.addData(current); return o;});
+        return accumulator.getStat();
+    }
+
+    /** {@inheritDoc} */
     @Override
     public OverallStat<CommonStatTypes> getAllStatFor(List<ChangedFileContent> changed) {
+        return getAllStatFor(changed.stream());
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public OverallStat<CommonStatTypes> getAllStatFor(Stream<ChangedFileContent> changed) {
+        Set<CommonStatTypes> chosenKeys = statConstructors.keySet();
+        List<? extends StatAccumulator<CommonStatTypes, ?>> accumulators = chosenKeys.stream()
+                .map(key -> this.constructAccumulator(key.getDataType(), key))
+                .collect(Collectors.toList());
+
+        // TODO [442657] [08.05.2018] [Aleksandr.Tsarev] Change accumulator to fit Stream API.
+        changed.reduce((o, current) -> {
+            accumulators.forEach(acc -> acc.addData(current));
+            return o;
+        });
+
         Map<CommonStatTypes, StatEntry<CommonStatTypes, ?>> accumulated = new HashMap<>();
-        for (CommonStatTypes accumulatorType : statConstructors.keySet()) {
-            StatAccumulator<CommonStatTypes, ?> accumulator = constructAccumulator(accumulatorType.getDataType(), accumulatorType);
-            addAllToAccumulator(accumulator, changed);
-            accumulated.put(accumulatorType, accumulator.getStat());
+        for (StatAccumulator<CommonStatTypes, ?> accumulator : accumulators) {
+            accumulated.put(accumulator.getKey(), accumulator.getStat());
         }
         return new OverallStat<>(accumulated);
     }
+
+    // ---- [CommonCompositeStatProvider] Private methods ------------------------------------------
 
     /**
      * Add all contents to accumulator.

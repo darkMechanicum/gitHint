@@ -1,15 +1,15 @@
 package com.tsarev.githint.vcs.api;
 
 /**
- * Интерфейс, преднащначенный для анализа различий состава двух ревизий.
+ * Interface for computing content difference.
  */
 public interface FileDiffProvider {
 
     /**
-     * Анализ и получение различий между двумя файлами, представленными строками.
+     * Get difference between two line based contents.
      *
-     * @param first содержимое первого файла
-     * @param second содержимое второго файла
+     * @param first first content
+     * @param second second content
      */
     ChangedLines parseChanges(String first, String second);
 }

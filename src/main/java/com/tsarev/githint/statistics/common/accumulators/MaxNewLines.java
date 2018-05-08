@@ -21,6 +21,7 @@ public class MaxNewLines implements StatAccumulator<CommonStatTypes, Long> {
      */
     private Map<String, Long> agregation = new HashMap<>();
 
+    /** {@inheritDoc} */
     @Override
     public void addData(ChangedFileContent changedContent) {
         String author = changedContent.commonInfo.author;
@@ -34,6 +35,7 @@ public class MaxNewLines implements StatAccumulator<CommonStatTypes, Long> {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public StatEntry<CommonStatTypes, Long> getStat() {
         Collection<String> maxNewLinesAuthors = null;
@@ -52,6 +54,12 @@ public class MaxNewLines implements StatAccumulator<CommonStatTypes, Long> {
                 maxNewLinesAuthors.add(maxCandidateAuthor);
             }
         }
-        return new StatEntry<>(CommonStatTypes.MAX_NEW_LINES, maxNewLinesAuthors, maxNewLines);
+        return new StatEntry<>(getKey(), maxNewLinesAuthors, maxNewLines);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public CommonStatTypes getKey() {
+        return CommonStatTypes.MAX_NEW_LINES;
     }
 }

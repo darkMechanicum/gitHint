@@ -26,6 +26,7 @@ public class MaxAverageOldNewLinesDiff implements StatAccumulator<CommonStatType
      */
     private Map<String, Long> agregationCount = new HashMap<>();
 
+    /** {@inheritDoc} */
     @Override
     public void addData(ChangedFileContent changedContent) {
         String author = changedContent.commonInfo.author;
@@ -43,6 +44,7 @@ public class MaxAverageOldNewLinesDiff implements StatAccumulator<CommonStatType
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public StatEntry<CommonStatTypes, Long> getStat() {
         Collection<String> maxNewLinesAuthors = new ArrayList<>();
@@ -57,6 +59,12 @@ public class MaxAverageOldNewLinesDiff implements StatAccumulator<CommonStatType
                 maxNewLinesAuthors.add(author);
             }
         }
-        return new StatEntry<>(CommonStatTypes.MAX_NEW_LINES, maxNewLinesAuthors, maxAvg);
+        return new StatEntry<>(getKey(), maxNewLinesAuthors, maxAvg);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public CommonStatTypes getKey() {
+        return CommonStatTypes.MAX_AVG_OLD_NEW_LINES_DIFF;
     }
 }

@@ -8,67 +8,60 @@ import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.changes.ContentRevision;
 import com.intellij.openapi.vcs.history.VcsFileRevision;
 import com.intellij.openapi.vcs.history.VcsRevisionNumber;
+import com.intellij.openapi.vcs.versionBrowser.ChangeBrowserSettings;
 import com.intellij.openapi.vcs.versionBrowser.CommittedChangeList;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.vcsUtil.VcsUtil;
 import com.tsarev.githint.vcs.api.*;
 import git4idea.GitVcs;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
- * Реализация {@link FileChangeInfoProvider} используя Git.
+ * Idea git integration based implementation.
  */
 public class GitFileChangeInfoProvider implements FileChangeInfoProvider {
 
     /**
-     * Получатель различий файлов.
+     * Difference provider implementation.
      */
     private final FileDiffProvider diffProvider;
 
     /**
-     * Конструктор.
+     * Constructor.
+     *
+     * @param diffProvider selected difference provider implementation
      */
     public GitFileChangeInfoProvider(FileDiffProvider diffProvider) {
         this.diffProvider = diffProvider;
     }
+
+    // ---- [GitFileChangeInfoProvider] Interface methods ------------------------------------------
 
     /** {@inheritDoc} */
     @Override
     public ChangedFileContent getChangedContentFor(Project project,
                                                    VirtualFile file,
                                                    VcsRevisionNumber revision) {
-        FileChangeCommonInfo commonChangeInfo = getCommonChangeInfoFor(project, file, revision);
-
-        FilePath filePath = VcsUtil.getFilePath(file);
-        GitVcs gitVcs = GitVcs.getInstance(project);
-        CommittedChangesProvider committedChangesProvider = gitVcs.getCommittedChangesProvider();
-        Pair<CommittedChangeList, FilePath> oneList;
-        try {
-            long current = System.currentTimeMillis();
-            oneList = committedChangesProvider.getOneList(file, revision);
-            System.out.println("Time to get one revision list: " + (System.currentTimeMillis() - current));
-        } catch (VcsException e) {
-            throw new RuntimeException();
+        Pair<Change, CommittedChangeList> pair = getFileChangeForRevision(project, file, revision);
+        if (pair != null) {
+            FileChangeCommonInfo commonInfo = getFileChangeCommonInfo(pair);
+            ChangedLines changedLines = parseChange(pair.getFirst());
+            return new ChangedFileContent(commonInfo, changedLines);
+        } else {
+            return null;
         }
-        CommittedChangeList changeList = oneList.getFirst();
-        Collection<Change> changes = changeList.getChanges();
-        for (Change change : changes) {
-            ContentRevision lastRevisionContent = change.getAfterRevision();
-            if (lastRevisionContent == null) {
-                lastRevisionContent = change.getBeforeRevision();
-            }
-            if (FileUtil.filesEqual(lastRevisionContent.getFile().getIOFile(), filePath.getIOFile())) {
-                ChangedLines changedLines = parseChange(change);
-                return new ChangedFileContent(commonChangeInfo, changedLines);
-            }
-        }
-        return null;
-
     }
 
+    /** {@inheritDoc} */
     @Override
-    public List<ChangedFileContent> getChangedContentFor(Project project, VirtualFile file, List<VcsRevisionNumber> revisions) {
+    public List<ChangedFileContent> getChangedContentFor(Project project,
+                                                         VirtualFile file,
+                                                         List<VcsRevisionNumber> revisions) {
         ArrayList<ChangedFileContent> contents = new ArrayList<>();
         for (VcsRevisionNumber revision : revisions) {
             contents.add(getChangedContentFor(project, file, revision));
@@ -78,36 +71,24 @@ public class GitFileChangeInfoProvider implements FileChangeInfoProvider {
 
     /** {@inheritDoc} */
     @Override
+    public Stream<ChangedFileContent> getChangedContentFor(Project project,
+                                                           VirtualFile file,
+                                                           Stream<VcsRevisionNumber> revisions) {
+        return revisions.map(revision -> this.getChangedContentFor(project, file, revision));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public FileChangeCommonInfo getCommonChangeInfoFor(Project project,
                                                        VirtualFile file,
                                                        VcsRevisionNumber revision) {
-        FilePath filePath = VcsUtil.getFilePath(file);
-        GitVcs gitVcs = GitVcs.getInstance(project);
-        CommittedChangesProvider committedChangesProvider = gitVcs.getCommittedChangesProvider();
-        Pair<CommittedChangeList, FilePath> oneList;
-        try {
-            oneList = committedChangesProvider.getOneList(file, revision);
-        } catch (VcsException e) {
-            throw new RuntimeException();
-        }
-        CommittedChangeList changeList = oneList.getFirst();
-        Collection<Change> changes = changeList.getChanges();
-        for (Change change : changes) {
-            ContentRevision lastRevisionContent = change.getAfterRevision();
-            if (lastRevisionContent == null) {
-                lastRevisionContent = change.getBeforeRevision();
-            }
-            if (FileUtil.filesEqual(lastRevisionContent.getFile().getIOFile(), filePath.getIOFile())) {
-                return new FileChangeCommonInfo(
-                        changeList.getCommitterName(),
-                        changeList.getCommitDate(),
-                        FileChangeCommonInfo.ChangeType.fromIdeaType(change.getType())
-                );
-            }
-        }
-        return null;
+        Pair<Change, CommittedChangeList> pair = getFileChangeForRevision(project, file, revision);
+        return getFileChangeCommonInfo(pair);
     }
 
+    /** {@inheritDoc} */
     @Override
     public FileChangeCommonInfo getCommonChangeInfoForLatest(Project project, VirtualFile file) {
         GitVcs gitVcs = GitVcs.getInstance(project);
@@ -121,23 +102,8 @@ public class GitFileChangeInfoProvider implements FileChangeInfoProvider {
     }
 
     /**
-     * Получение различий, сделанных в ревизии.
+     * {@inheritDoc}
      */
-    private ChangedLines parseChange(Change change) {
-        try {
-            long current = System.currentTimeMillis();
-            String beforeContent = change.getBeforeRevision().getContent();
-            String afterContent = change.getAfterRevision().getContent();
-            System.out.println("Time get content: " + (System.currentTimeMillis() - current));
-            return diffProvider.parseChanges(beforeContent, afterContent);
-        } catch (VcsException e) {
-            throw new RuntimeException();
-        } finally {
-
-        }
-    }
-
-    /** {@inheritDoc} */
     @Override
     public ChangedFileContent getChangedContentForLatest(Project project, VirtualFile file) {
         GitVcs gitVcs = GitVcs.getInstance(project);
@@ -148,5 +114,92 @@ public class GitFileChangeInfoProvider implements FileChangeInfoProvider {
         } catch (VcsException e) {
             throw new RuntimeException();
         }
+    }
+
+    // ---- [GitFileChangeInfoProvider] Private methods ------------------------------------------
+
+    /**
+     * Get commit change info from changelist and change.
+     *
+     * @return corresponding {@link FileChangeCommonInfo}, or {@code null} if pair is {@code null}.
+     */
+    private FileChangeCommonInfo getFileChangeCommonInfo(@Nullable Pair<Change, CommittedChangeList> pair) {
+        if (pair != null) {
+            return new FileChangeCommonInfo(
+                    pair.getSecond().getCommitterName(),
+                    pair.getSecond().getCommitDate(),
+                    FileChangeCommonInfo.ChangeType.fromIdeaType(pair.getFirst().getType())
+            );
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Get revision changed lines.
+     */
+    private ChangedLines parseChange(Change change) {
+        try {
+            String beforeContent = change.getBeforeRevision().getContent();
+            String afterContent = change.getAfterRevision().getContent();
+            return diffProvider.parseChanges(beforeContent, afterContent);
+        } catch (VcsException e) {
+            throw new RuntimeException();
+        }
+    }
+
+    /**
+     * Get {@link Change} for selected revision and file.
+     *
+     * @return {@link Change} and its {@link CommittedChangeList}
+     * or {@code null} if no revision were found or no file in
+     * changelist match revision number.
+     */
+    private Pair<Change, CommittedChangeList> getFileChangeForRevision(Project project,
+                                                                       VirtualFile file,
+                                                                       VcsRevisionNumber revision) {
+        // Get GitVcs.
+        FilePath filePath = VcsUtil.getFilePath(file);
+        GitVcs gitVcs = GitVcs.getInstance(project);
+
+        if (gitVcs == null) {
+            throw new RuntimeException("No git enabled at project.");
+        }
+
+        //noinspection unchecked We get here right type, as it is declared in GitVcs.
+        CommittedChangesProvider<CommittedChangeList, ChangeBrowserSettings> committedChangesProvider = gitVcs.getCommittedChangesProvider();
+
+        if (committedChangesProvider == null) {
+            throw new RuntimeException("No CommittedChangesProvider found for GitVcs.");
+        }
+
+        // Get changelist.
+        Pair<CommittedChangeList, FilePath> oneList;
+        try {
+            oneList = committedChangesProvider.getOneList(file, revision);
+        } catch (VcsException e) {
+            throw new RuntimeException("Failed to read changelist for revision.");
+        }
+
+        if (oneList == null) {
+            return null;
+        }
+
+        // Find corresponding file change.
+        CommittedChangeList changeList = oneList.getFirst();
+        Collection<Change> changes = changeList.getChanges();
+        for (Change change : changes) {
+            ContentRevision chosenRevision = change.getAfterRevision();
+            if (chosenRevision == null) {
+                chosenRevision = change.getBeforeRevision();
+            }
+            if (chosenRevision == null) {
+                return null;
+            }
+            if (FileUtil.filesEqual(chosenRevision.getFile().getIOFile(), filePath.getIOFile())) {
+                return new Pair<>(change, changeList);
+            }
+        }
+        return null;
     }
 }

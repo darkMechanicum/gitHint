@@ -5,22 +5,22 @@ import com.intellij.openapi.vcs.changes.Change;
 import java.util.Date;
 
 /**
- * Базовая информация об изменении.
+ * Common change info.
  */
 public class FileChangeCommonInfo {
 
     /**
-     * Имя автора.
+     * Author name.
      */
     public final String author;
 
     /**
-     * Дата изменения.
+     * Change date.
      */
     public final Date changeDate;
 
     /**
-     * Тип изменения.
+     * Change type.
      */
     public final ChangeType changeType;
 

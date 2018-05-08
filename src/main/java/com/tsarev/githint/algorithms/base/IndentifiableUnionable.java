@@ -4,7 +4,7 @@ public abstract class IndentifiableUnionable<ResultType, PointType extends Abstr
         implements BaseUnionable<ResultType, PointType> {
 
     /**
-     * Идентификатор.
+     * Base identifier for abstract dynamic algorithm step.
      */
     private final long id;
 

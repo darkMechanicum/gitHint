@@ -1,12 +1,14 @@
 package com.tsarev.githint.algorithms.base;
 
 /**
- * Идентификация промежуточного результата.
+ * Intermediate result identification.
  */
 public interface AbstractPoint<PointType extends AbstractPoint> {
 
     /**
-     * Получение индекса, смещенного на переданный от текущего.
+     * Get shifted index.
+     *
+     * @param point how much to shift
      */
-    PointType shiftThis(PointType pointType);
+    PointType shiftThis(PointType point);
 }

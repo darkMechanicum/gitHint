@@ -11,37 +11,39 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Алгоритм поиска большей общей подпоследовательности.
+ * LCS dynamic based algorithm.
+ *
+ * @see <a href="https://en.wikipedia.org/wiki/Longest_common_subsequence_problem">Longest common subsequence problem</a>
  */
 public class LongestSubsequenceAlgorithm {
 
     /**
-     * Первый массив.
+     * First sequence.
      */
     private Object[] firstArray;
 
     /**
-     * Второй массив.
+     * Second sequence.
      */
     private Object[] secondArray;
 
     /**
-     * Длина самой большой подпоследовательности.
+     * LCS length.
      */
     private long result;
 
     /**
-     * Идентификаторы объектов подпоследовательности в первом массиве.
+     * LCS elements identifiers from first sequence.
      */
     private List<Integer> firstArrayIndexTrace;
 
     /**
-     * Идентификаторы объектов подпоследовательности во втором массиве.
+     * LCS elements identifiers from second sequence.
      */
     private List<Integer> secondArrayIndexTrace;
 
     /**
-     * Динамический алгоритм.
+     * Used dynamic algorithm.
      */
     private final TwoDimensionalDynamicAlgorithm<Long> dynamicAlgorithm;
 
@@ -50,7 +52,7 @@ public class LongestSubsequenceAlgorithm {
     private static final int NON_EQUAL_STEP_ID = 3;
 
     /**
-     * Для того, чтобы заполнять пустые ячеки вблизи границ массива.
+     * Empty step within matrix borders.
      */
     private final BaseUnionable<Long, TwoDimensionalPoint> emptyProvider =
             new NoPointUnionable<>(
@@ -59,7 +61,7 @@ public class LongestSubsequenceAlgorithm {
                     (point) -> 0L);
 
     /**
-     * Если текущие элементы равны.
+     * Equal elements step.
      */
     private final BaseUnionable<Long, TwoDimensionalPoint> previosEquals =
             new OnePointUnionable<>(
@@ -71,7 +73,7 @@ public class LongestSubsequenceAlgorithm {
 
 
     /**
-     * Если текущие элементы не равны.
+     * Non equal elements step.
      */
     private final BaseUnionable<Long, TwoDimensionalPoint> previousNotEqual =
             new TwoPointsUnionable<>(
@@ -83,7 +85,10 @@ public class LongestSubsequenceAlgorithm {
             );
 
     /**
-     * Конструктор.
+     * Constructor.
+     *
+     * @param firstArray first sequence
+     * @param secondArray second sequence
      */
     public LongestSubsequenceAlgorithm(Object[] firstArray,
                                        Object[] secondArray) {
@@ -99,7 +104,7 @@ public class LongestSubsequenceAlgorithm {
     }
 
     /**
-     * Вызов алгоритма.
+     * Perform LCS search.
      */
     public void run() {
         try {
@@ -125,8 +130,7 @@ public class LongestSubsequenceAlgorithm {
     }
 
     /**
-     * Поиск идентификаторов массивов, на которых увеличивалась
-     * общая подпоследовательность.
+     * Subsequence identifiers search.
      */
     private List<Integer> preTrace(BaseDynamicAlgorithm<Long, TwoDimensionalPoint>.ResultHolder resultHolder,
                                    Function<BaseDynamicAlgorithm<Long, TwoDimensionalPoint>.ResultHolder, Integer> indexExtractor) {
@@ -153,14 +157,14 @@ public class LongestSubsequenceAlgorithm {
     }
 
     /**
-     * Проверка того, что в масисвах будут нужные элементы.
+     * Sequence range check.
      */
     private boolean doesViolateBorders(int x, int y) {
         return x - 1 >= firstArray.length || y - 1 >= secondArray.length;
     }
 
     /**
-     * Сравнение элементов массивов.
+     * Sequence elements comparison.
      */
     private boolean areEqual(int x, int y) {
         return Objects.equals(firstArray[x - 1], secondArray[y - 1]);

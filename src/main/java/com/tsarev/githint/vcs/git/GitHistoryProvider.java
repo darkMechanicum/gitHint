@@ -12,9 +12,10 @@ import git4idea.history.GitFileHistory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
- * Реализация получения исторической информации, основанная на Git.
+ * Idea git integration based implementation.
  */
 public class GitHistoryProvider implements FileHistoryProvider {
 
@@ -33,6 +34,16 @@ public class GitHistoryProvider implements FileHistoryProvider {
         return revisions.stream()
                 .map(GitFileRevision::getRevisionNumber)
                 .collect(Collectors.toList());
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Stream<VcsRevisionNumber> getRevisionStream(Project project, VirtualFile file, boolean parallel) {
+        if (parallel) {
+            return getRevisionList(project, file).parallelStream();
+        } else {
+            return getRevisionList(project, file).stream();
+        }
     }
 
 }

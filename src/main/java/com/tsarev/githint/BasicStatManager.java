@@ -14,6 +14,7 @@ import com.tsarev.githint.statistics.common.CommonStatTypes;
 import com.tsarev.githint.statistics.common.accumulators.MaxNewLines;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public class BasicStatManager {
 
@@ -27,9 +28,9 @@ public class BasicStatManager {
         statProvider.register(CommonStatTypes.MAX_NEW_LINES, MaxNewLines::new);
         statProvider.register(CommonStatTypes.MAX_AVG_OLD_NEW_LINES_DIFF, MaxAverageOldNewLinesDiff::new);
 
-        List<VcsRevisionNumber> revisions = historyProvider.getRevisionList(project, file);
-        revisions = revisions.subList(0, revisions.size() - 2);
-        List<ChangedFileContent> changed = changeInfoProvider.getChangedContentFor(project, file, revisions);
+        List<VcsRevisionNumber> revisionList = historyProvider.getRevisionList(project, file);
+        Stream<VcsRevisionNumber> revisions = revisionList.subList(0, revisionList.size() - 2).stream();
+        Stream<ChangedFileContent> changed = changeInfoProvider.getChangedContentFor(project, file, revisions);
         OverallStat<CommonStatTypes> stats = statProvider.getAllStatFor(changed);
 
         StatEntry<CommonStatTypes, Long> maxNewLinesStat = stats.getStatFor(CommonStatTypes.MAX_NEW_LINES, Long.class);

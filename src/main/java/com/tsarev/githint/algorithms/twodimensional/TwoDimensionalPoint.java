@@ -3,7 +3,7 @@ package com.tsarev.githint.algorithms.twodimensional;
 import com.tsarev.githint.algorithms.base.AbstractPoint;
 
 /**
- * Индекс элемента двумерного массива.
+ * Two dimensional dynamic algorithm matrix index.
  */
 public class TwoDimensionalPoint implements AbstractPoint<TwoDimensionalPoint> {
 

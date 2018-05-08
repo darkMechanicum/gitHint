@@ -1,17 +1,17 @@
 package com.tsarev.githint.vcs.api;
 
 /**
- * Полные сведения об изменениях в файле.
+ * Full file change info.
  */
 public class ChangedFileContent {
 
     /**
-     * Базовая информация об изменении.
+     * Common change info.
      */
     public final FileChangeCommonInfo commonInfo;
 
     /**
-     * Изменения содержимого.
+     * Changed content.
      */
     public final ChangedLines changedLines;
 
