@@ -25,13 +25,23 @@
     <depends>Git4Idea</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <!-- Add your extensions here -->
+        <!-- Tool window to list fetched statistics. -->
+        <toolWindow id="statisticsToolWindow" canCloseContents="true" anchor="bottom" factoryClass="com.tsarev.githint.ui.StatListToolWindow"/>
     </extensions>
 
     <actions>
+        <!-- Hello button to toggle statistics collection. -->
         <group id="MyPlugin.SampleMenu" text="Greeting" description="Greeting menu">
             <add-to-group group-id="MainMenu" anchor="last"/>
             <action id="Myplugin.Textboxes" class="com.tsarev.githint.GetGitStats" text="Hello" description="Says hello"/>
         </group>
     </actions>
+
+    <project-components>
+        <!-- View data holder. -->
+        <component>
+            <implementation-class>com.tsarev.githint.ui.StatListViewDataHolder</implementation-class>
+        </component>
+    </project-components>
+
 </idea-plugin>

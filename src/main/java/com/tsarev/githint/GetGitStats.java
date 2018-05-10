@@ -4,14 +4,25 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowManager;
+import com.intellij.ui.content.Content;
+import com.intellij.ui.content.ContentManager;
+import com.tsarev.githint.ui.ListViewable;
+import com.tsarev.githint.ui.StatListToolWindow;
+import com.tsarev.githint.ui.StatListToolboxTab;
+import com.tsarev.githint.ui.StatListViewDataHolder;
+import com.tsarev.githint.vcs.api.FileChangeInfoProvider;
 import com.tsarev.githint.vcs.common.SimpleDiffProvider;
 import com.tsarev.githint.vcs.git.GitFileChangeInfoProvider;
 import com.tsarev.githint.vcs.git.GitHistoryProvider;
-import com.tsarev.githint.vcs.api.FileChangeInfoProvider;
+
+import java.util.Collection;
+import java.util.List;
 
 public class GetGitStats extends AnAction {
+
     public GetGitStats() {
         super("Get git statistics");
     }
@@ -27,16 +38,23 @@ public class GetGitStats extends AnAction {
         SimpleDiffProvider diffProvider = new SimpleDiffProvider();
         FileChangeInfoProvider changeInfoProvider = new GitFileChangeInfoProvider(diffProvider);
 
-        String collectedSats = BasicStatManager.collectCommonStats(
+        Collection<ListViewable> viewableStats = BasicStatManager.collectCommonStats(
                 project,
                 currentFile,
                 changeInfoProvider,
                 gitHistoryProvider
         );
 
-        Messages.showMessageDialog(project,
-                collectedSats,
-                "Stats",
-                Messages.getInformationIcon());
+        ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(StatListToolWindow.ID);
+
+        StatListViewDataHolder dataHolder = project.getComponent(StatListViewDataHolder.class);
+        ContentManager contentManager = toolWindow.getContentManager();
+        StatListToolboxTab component = new StatListToolboxTab(dataHolder.getAsModel());
+        Content content = contentManager.getFactory().createContent(component, "first", true);
+        contentManager.addContent(content);
+        List<ListViewable> viewList = dataHolder.getAsList();
+        viewList.clear();
+        viewList.addAll(viewableStats);
+        toolWindow.show(() -> {});
     }
 }
