@@ -9,7 +9,7 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentManager;
-import com.tsarev.githint.common.TableModelArrayListProxy;
+import com.tsarev.githint.ui.observables.TableModelArrayListProxy;
 import com.tsarev.githint.statistics.api.EntryData;
 import com.tsarev.githint.statistics.common.CommonStatTypes;
 import com.tsarev.githint.ui.TabViewable;

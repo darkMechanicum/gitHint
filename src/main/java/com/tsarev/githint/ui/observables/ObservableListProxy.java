@@ -1,4 +1,4 @@
-package com.tsarev.githint.common;
+package com.tsarev.githint.ui.observables;
 
 import org.jetbrains.annotations.NotNull;
 
