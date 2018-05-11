@@ -37,11 +37,4 @@
         </group>
     </actions>
 
-    <project-components>
-        <!-- View data holder. -->
-        <component>
-            <implementation-class>com.tsarev.githint.ui.StatListViewDataHolder</implementation-class>
-        </component>
-    </project-components>
-
 </idea-plugin>

@@ -2,7 +2,6 @@ package com.tsarev.githint.common;
 
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -10,49 +9,86 @@ import java.util.ListIterator;
 
 /**
  * <p>
- * Naive and exception/concurrent unsafe list proxy to implement {@link javax.swing.ListModel}.
+ * Naive and exception/concurrent unsafe list proxy to implement some swing model.
  * No iterator elements modification supported.
  * </p>
  * <p>
  * Useful, when iterator or concurrent modifications are not needed.
  * </p>
  */
-public class ObservableListProxy<T> extends AbstractListModel<T> implements List<T> {
+public abstract class ObservableListProxy<DataT, ModelT> implements List<DataT> {
 
     /**
      * Proxied list.
      */
-    private final List<T> innerCollection;
+    private final List<DataT> innerList;
+
+    /**
+     * Callback, called when elements are added.
+     */
+    private final ModelCallback<ModelT> addCallback;
+
+    /**
+     * Callback, called when elements are removed.
+     */
+    private final ModelCallback<ModelT> removeCallback;
+
+    /**
+     * Callback, called when elements are changed.
+     */
+    private final ModelCallback<ModelT> changeCallback;
 
     /**
      * Constructor.
+     *
+     * @param innerList proxied modifiable collection
+     * @param addCallback add element callback
+     * @param removeCallback remove element callback
+     * @param changeCallback change element callback
      */
-    public ObservableListProxy(List<T> innerCollection) {
-        this.innerCollection = innerCollection;
+    public ObservableListProxy(List<DataT> innerList,
+                               ModelCallback<ModelT> addCallback,
+                               ModelCallback<ModelT> removeCallback,
+                               ModelCallback<ModelT> changeCallback) {
+        this.innerList = innerList;
+        this.addCallback = addCallback;
+        this.removeCallback = removeCallback;
+        this.changeCallback = changeCallback;
     }
 
+    /**
+     * Get inner model.
+     */
+    protected abstract ModelT getModel();
+
+    /**
+     * Method to get sublist from proxied collection.
+     */
+    protected final List<DataT> innerSubList(int from, int to) {
+        return innerList.subList(from, to);
+    }
 
     @Override
     public int size() {
-        return innerCollection.size();
+        return innerList.size();
     }
 
     @Override
     public boolean isEmpty() {
-        return innerCollection.isEmpty();
+        return innerList.isEmpty();
     }
 
     @Override
     public boolean contains(Object o) {
-        return innerCollection.contains(o);
+        return innerList.contains(o);
     }
 
     @NotNull
     @Override
-    public Iterator<T> iterator() {
-        return new Iterator<T>() {
+    public Iterator<DataT> iterator() {
+        return new Iterator<DataT>() {
 
-            private final Iterator<T> innerIterator = innerCollection.iterator();
+            private final Iterator<DataT> innerIterator = innerList.iterator();
 
             @Override
             public boolean hasNext() {
@@ -60,7 +96,7 @@ public class ObservableListProxy<T> extends AbstractListModel<T> implements List
             }
 
             @Override
-            public T next() {
+            public DataT next() {
                 return innerIterator.next();
             }
 
@@ -74,60 +110,60 @@ public class ObservableListProxy<T> extends AbstractListModel<T> implements List
     @NotNull
     @Override
     public Object[] toArray() {
-        return innerCollection.toArray();
+        return innerList.toArray();
     }
 
     @NotNull
     @Override
     public <T1> T1[] toArray(@NotNull T1[] a) {
-        return innerCollection.toArray(a);
+        return innerList.toArray(a);
     }
 
     @Override
-    public boolean add(T t) {
-        int size = innerCollection.size();
+    public boolean add(DataT dataT) {
+        int size = innerList.size();
         try {
-            return innerCollection.add(t);
+            return innerList.add(dataT);
         } finally {
-            fireIntervalAdded(this, size, size);
+            addCallback.doNotifyModel(getModel(), size, size);
         }
     }
 
     @Override
     public boolean remove(Object o) {
-        int found = innerCollection.indexOf(o);
+        int found = innerList.indexOf(o);
         if (found == -1) {
             return false;
         } else {
-            innerCollection.remove(o);
-            fireIntervalRemoved(this, found, found);
+            innerList.remove(o);
+            removeCallback.doNotifyModel(getModel(), found, found);
             return true;
         }
     }
 
     @Override
     public boolean containsAll(@NotNull Collection<?> c) {
-        return innerCollection.containsAll(c);
+        return innerList.containsAll(c);
     }
 
     @Override
-    public boolean addAll(@NotNull Collection<? extends T> c) {
-        int size = innerCollection.size();
+    public boolean addAll(@NotNull Collection<? extends DataT> c) {
+        int size = innerList.size();
         int newTail = c.size() + size - 1;
         try {
-            return innerCollection.addAll(c);
+            return innerList.addAll(c);
         } finally {
-            fireIntervalAdded(this, size, newTail);
+            addCallback.doNotifyModel(getModel(), size, newTail);
         }
     }
 
     @Override
-    public boolean addAll(int index, @NotNull Collection<? extends T> c) {
+    public boolean addAll(int index, @NotNull Collection<? extends DataT> c) {
         int addedSize = c.size();
         try {
-            return innerCollection.addAll(index, c);
+            return innerList.addAll(index, c);
         } finally {
-            fireIntervalAdded(this, index, addedSize + index);
+            addCallback.doNotifyModel(getModel(), index, addedSize + index);
         }
     }
 
@@ -159,75 +195,59 @@ public class ObservableListProxy<T> extends AbstractListModel<T> implements List
         if (size == 0) {
             return;
         }
-        innerCollection.clear();
-        this.fireIntervalRemoved(this, 0, size - 1);
+        innerList.clear();
+        removeCallback.doNotifyModel(getModel(), 0, size - 1);
     }
 
     @Override
-    public T get(int index) {
-        return innerCollection.get(index);
+    public DataT get(int index) {
+        return innerList.get(index);
     }
 
     @Override
-    public T set(int index, T element) {
+    public DataT set(int index, DataT element) {
         try {
-            return innerCollection.set(index, element);
+            return innerList.set(index, element);
         } finally {
-            this.fireContentsChanged(this, index, index);
+            changeCallback.doNotifyModel(getModel(), index, index);
         }
     }
 
     @Override
-    public void add(int index, T element) {
-        innerCollection.add(index, element);
-        fireIntervalAdded(this, index, index);
+    public void add(int index, DataT element) {
+        innerList.add(index, element);
+        addCallback.doNotifyModel(getModel(), index, index);
     }
 
     @Override
-    public T remove(int index) {
+    public DataT remove(int index) {
         try {
-            return innerCollection.remove(index);
+            return innerList.remove(index);
         } finally {
-            this.fireIntervalRemoved(this, index, index);
+            removeCallback.doNotifyModel(getModel(), index, index);
         }
     }
 
     @Override
     public int indexOf(Object o) {
-        return innerCollection.indexOf(o);
+        return innerList.indexOf(o);
     }
 
     @Override
     public int lastIndexOf(Object o) {
-        return innerCollection.lastIndexOf(o);
+        return innerList.lastIndexOf(o);
     }
 
     @NotNull
     @Override
-    public ListIterator<T> listIterator() {
-        return new NonModifiableListIteratorProxy<>(new NonModifiableListIteratorProxy<>(innerCollection.listIterator()));
+    public ListIterator<DataT> listIterator() {
+        return new NonModifiableListIteratorProxy<>(new NonModifiableListIteratorProxy<>(innerList.listIterator()));
     }
 
     @NotNull
     @Override
-    public ListIterator<T> listIterator(int index) {
-        return new NonModifiableListIteratorProxy<>(new NonModifiableListIteratorProxy<>(innerCollection.listIterator(index)));
-    }
-
-    @NotNull
-    @Override
-    public List<T> subList(int fromIndex, int toIndex) {
-        return new ObservableListProxy<>(innerCollection.subList(fromIndex, toIndex));
-    }
-
-    @Override
-    public int getSize() {
-        return innerCollection.size();
-    }
-
-    @Override
-    public T getElementAt(int index) {
-        return this.get(index);
+    public ListIterator<DataT> listIterator(int index) {
+        return new NonModifiableListIteratorProxy<>(new NonModifiableListIteratorProxy<>(innerList.listIterator(index)));
     }
 
     /**
@@ -285,5 +305,16 @@ public class ObservableListProxy<T> extends AbstractListModel<T> implements List
         public void add(T t) {
             throw new UnsupportedOperationException();
         }
+    }
+
+    /**
+     * Interface to separate custom swing model from list proxy.
+     */
+    @FunctionalInterface
+    public interface ModelCallback<ModelT> {
+        /**
+         * Notify model about changes.
+         */
+        void doNotifyModel(ModelT model, Integer beginIndex, Integer endIndex);
     }
 }

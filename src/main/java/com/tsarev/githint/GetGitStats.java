@@ -9,15 +9,16 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentManager;
+import com.tsarev.githint.common.TableModelListProxy;
 import com.tsarev.githint.ui.ListViewable;
 import com.tsarev.githint.ui.StatListToolWindow;
 import com.tsarev.githint.ui.StatListToolboxTab;
-import com.tsarev.githint.ui.StatListViewDataHolder;
 import com.tsarev.githint.vcs.api.FileChangeInfoProvider;
 import com.tsarev.githint.vcs.common.SimpleDiffProvider;
 import com.tsarev.githint.vcs.git.GitFileChangeInfoProvider;
 import com.tsarev.githint.vcs.git.GitHistoryProvider;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -45,16 +46,20 @@ public class GetGitStats extends AnAction {
                 gitHistoryProvider
         );
 
-        ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(StatListToolWindow.ID);
+        TableModelListProxy<ListViewable> viewedData = new TableModelListProxy<>(
+                new ArrayList<>(),
+                3,
+                ListViewable::getColumnContent,
+                (index) -> Object.class,
+                (index) -> "hello");
 
-        StatListViewDataHolder dataHolder = project.getComponent(StatListViewDataHolder.class);
+        ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(StatListToolWindow.ID);
         ContentManager contentManager = toolWindow.getContentManager();
-        StatListToolboxTab component = new StatListToolboxTab(dataHolder.getAsModel());
+        StatListToolboxTab component = new StatListToolboxTab(viewedData);
         Content content = contentManager.getFactory().createContent(component, "first", true);
         contentManager.addContent(content);
-        List<ListViewable> viewList = dataHolder.getAsList();
-        viewList.clear();
-        viewList.addAll(viewableStats);
+        viewedData.clear();
+        viewedData.addAll(viewableStats);
         toolWindow.show(() -> {});
     }
 }
