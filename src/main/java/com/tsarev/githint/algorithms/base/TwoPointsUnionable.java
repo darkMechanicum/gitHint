@@ -6,8 +6,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
- * Базовый шаг алгоритма с двумя относительными точками.
- * НА вход алгоритму применимости слияния передается только текущая точка.
+ * Base algorithm step with two relative points precondition
+ * and one external precondition.
  */
 public final class TwoPointsUnionable<ResultType, PointType extends AbstractPoint<PointType>>
         extends IndentifiableUnionable<ResultType, PointType> {

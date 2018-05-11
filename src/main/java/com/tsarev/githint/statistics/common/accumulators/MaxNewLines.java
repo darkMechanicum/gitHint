@@ -13,12 +13,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Агрегатор статистики для полчения автора с максимальным количеством новых линий.
+ * Statistics aggregator to collect authors, who made maximum new lines.
  */
 public class MaxNewLines implements StatAccumulator<CommonStatTypes, NumberData> {
 
     /**
-     * Таблица с количеством изменений для каждого автора.
+     * Per author new lines count table.
      */
     private Map<String, Long> agregation = new HashMap<>();
 

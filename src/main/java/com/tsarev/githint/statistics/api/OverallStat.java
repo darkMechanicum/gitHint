@@ -3,7 +3,7 @@ package com.tsarev.githint.statistics.api;
 import java.util.Map;
 
 /**
- * Статистика по несокльких файлам.
+ * Several stat entries.
  */
 public class OverallStat<KeyT> {
 

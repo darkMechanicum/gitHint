@@ -4,36 +4,34 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * Базовый предикат применимости функции слияния.
+ * Base dynamic algorithm step description.
  */
 public interface BaseUnionable<ResultType, PointType extends AbstractPoint> {
 
     /**
-     * Относительные координаты элементов массива,
-     * которые нужны для вычисления предиката.
+     * Relative identifiers, needed to perform step.
      */
     List<PointType> neededPoints();
 
     /**
-     * Проверка, можно ли выполнить слияние
-     * предыдущих результатов.
+     * Check if step can be performed.
      *
-     * @param currentPoint текущий идентификатор
-     * @param points абсолютные координаты элементов массива
-     * @param violateChecker функция проверки доступности идентификатора
+     * @param currentPoint current algorithm identifier
+     * @param points absolute identifiers for {@link BaseUnionable#neededPoints()}
+     * @param violateChecker function to check if identifier violates external conditions
      */
     boolean canUnion(PointType currentPoint,
                      List<PointType> points,
                      Function<PointType, Boolean> violateChecker);
 
     /**
-     * Слияние предыдущих результатов.
+     * Perform step.
      */
     ResultType unionPrevious(PointType currentPoint,
                              List<ResultType> previous);
 
     /**
-     * Получение идентификатора для разделения шагов.
+     * Get id to differentiate steps.
      */
     long getId();
 }

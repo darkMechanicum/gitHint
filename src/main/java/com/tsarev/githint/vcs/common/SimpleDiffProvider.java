@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Scanner;
 
 /**
- * Базовая реализация, основанная на алгоритме {@link LongestSubsequenceAlgorithm}.
+ * Base implementation, with {@link LongestSubsequenceAlgorithm}.
  */
 public class SimpleDiffProvider implements FileDiffProvider {
 
@@ -74,7 +74,7 @@ public class SimpleDiffProvider implements FileDiffProvider {
     }
 
     /**
-     * Разбиение содержимого на строки.
+     * Break file in lines.
      */
     private String[] parseLines(String raw) {
         Scanner scanner = new Scanner(new StringReader(raw));

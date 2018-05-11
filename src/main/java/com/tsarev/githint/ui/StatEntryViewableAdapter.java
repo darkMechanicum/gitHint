@@ -4,7 +4,7 @@ import com.tsarev.githint.statistics.api.StatEntry;
 import com.tsarev.githint.statistics.common.CommonStatTypes;
 
 /**
- * Simlpe stat entry adapter to view it.
+ * Simple stat entry adapter to view it.
  */
 public class StatEntryViewableAdapter implements TabViewable {
 

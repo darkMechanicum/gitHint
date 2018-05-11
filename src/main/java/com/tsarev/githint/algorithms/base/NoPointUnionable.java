@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * Базовый шаг алгоритма без зависимостей.
+ * Base algorithm step with no preconditions.
  */
 public final class NoPointUnionable<ResultType, PointType extends AbstractPoint<PointType>>
         extends IndentifiableUnionable<ResultType, PointType> {

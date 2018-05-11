@@ -3,32 +3,32 @@ package com.tsarev.githint.algorithms.subsequence;
 import java.util.List;
 
 /**
- * Алгоритм поиска большей общей подпоследовательности в строках.
+ * LCS algorithm adapter for {@link String}.
  */
 public class StringSubsequenceAlgorithmAdapter {
 
     /**
-     * Первая строка.
+     * First string.
      */
     private String firstString;
 
     /**
-     * Длина самой большой подпоследовательности.
+     * LCS length.
      */
     private long result;
 
     /**
-     * Самая большая подпоследовательность.
+     * LCS.
      */
     private String longestSubsequence;
 
     /**
-     * Динамический алгоритм.
+     * LCS algorithm.
      */
     private final LongestSubsequenceAlgorithm subsequenceAlgorithm;
 
     /**
-     * Конструктор.
+     * Constructor.
      */
     public StringSubsequenceAlgorithmAdapter(String firstString,
                                              String secondString) {
@@ -52,7 +52,7 @@ public class StringSubsequenceAlgorithmAdapter {
     }
 
     /**
-     * Выполнение алгоритма.
+     * Run the algorithm.
      */
     public void run() {
         subsequenceAlgorithm.run();
@@ -61,7 +61,7 @@ public class StringSubsequenceAlgorithmAdapter {
     }
 
     /**
-     * Получение подпоследовательности по индексам.
+     * Get LCS from source string and LCS indexes.
      */
     private String getSubsequence(String source, List<Integer> indexes) {
         char[] chars = source.toCharArray();
@@ -73,30 +73,16 @@ public class StringSubsequenceAlgorithmAdapter {
     }
 
     /**
-     * Получение длины наибольшей подпоследовательности.
+     * Get LCS length.
      */
     public long getResult() {
         return result;
     }
 
     /**
-     * Получение подпоследовательности в виде строки.
+     * Get LCS.
      */
     public String getLongestSubsequence() {
         return longestSubsequence;
-    }
-
-    /**
-     * Получение индексов подпоследовательности для первой строки.
-     */
-    public List<Integer> getFirstIndexes() {
-        return subsequenceAlgorithm.getFirstArrayIndexTrace();
-    }
-
-    /**
-     * Получение индексов подпоследовательности для второй строки.
-     */
-    public List<Integer> getSecondIndexes() {
-        return subsequenceAlgorithm.getSecondArrayIndexTrace();
     }
 }

@@ -1,20 +1,44 @@
 package com.tsarev.githint.algorithms.base;
 
+import com.tsarev.githint.algorithms.subsequence.LongestSubsequenceAlgorithm;
+import com.tsarev.githint.algorithms.twodimensional.TwoDimensionalDynamicAlgorithm;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Базовый класс для реализации динамических алгоритмов над двумерным массивом.
+ * <p>
+ * Base class for any dynamic algorithm.
+ * </p>
+ * <p>
+ * Core idea is at every moment there are some intermediate results
+ * available with their identifiers ({@link ResultHolder}), which can be
+ * merged with some algorithm steps ({@link BaseUnionable}).
+ * </p>
+ * <p>
+ * There is array of possible identifiers that can be violated
+ * (for example two dimensional array coordinates) to divide these results.
+ * For each identifier, one by one, algorithm chooses one step to perform, based on steps
+ * preconditions. Then, algorithm step merges previous results and saves new result
+ * at the current identifier. This continues, while there are some identifiers left.
+ * </p>
+ * <p>
+ * See two dimensional implementation: {@link TwoDimensionalDynamicAlgorithm}
+ * <br>
+ * See the example: {@link LongestSubsequenceAlgorithm}.
+ * </p>
  */
 public abstract class BaseDynamicAlgorithm<ResultType, PointType extends AbstractPoint<PointType>> {
 
     /**
-     * Набор функций слияния результатов.
+     * Algorithm steps description.
      */
     private final Iterable<BaseUnionable<ResultType, PointType>> unionables;
 
     /**
-     * Конструктор.
+     * Constructor.
+     *
+     * @param unionables used steps
      */
     public BaseDynamicAlgorithm(Collection<BaseUnionable<ResultType, PointType>> unionables) {
         ArrayList<BaseUnionable<ResultType, PointType>> rawUnionables = new ArrayList<>(unionables);
@@ -22,27 +46,27 @@ public abstract class BaseDynamicAlgorithm<ResultType, PointType extends Abstrac
     }
 
     /**
-     * Получение промежуточного результата по его идентификатору.
+     * Get intermediate result by its identifier.
      */
     public abstract ResultHolder getForPoint(PointType point);
 
     /**
-     * Проверка отсутствия идентификатора.
+     * Check if identifier does not exists.
      */
     protected abstract boolean violatesBorders(PointType point);
 
     /**
-     * Сохранение промежуточного результата по его идентификатору.
+     * Save intermediate result by its identifier.
      */
     protected abstract void setForPoint(PointType point, ResultHolder holder);
 
     /**
-     * Получение всех идентификаторов по порядку.
+     * Iterate over identifiers.
      */
     protected abstract Iterable<PointType> getPointIterator();
 
     /**
-     * Поиск подходящей функции.
+     * Get suitable algorithm step.
      */
     private Runnable findOne(PointType currentPoint) throws AlgorithmException {
         Collection<Runnable> candidates = new ArrayList<>();
@@ -62,7 +86,7 @@ public abstract class BaseDynamicAlgorithm<ResultType, PointType extends Abstrac
     }
 
     /**
-     * Выполнение алгоритма.
+     * Run algorithm.
      */
     public final ResultHolder run() throws AlgorithmException {
         PointType last = null;
@@ -74,7 +98,7 @@ public abstract class BaseDynamicAlgorithm<ResultType, PointType extends Abstrac
     }
 
     /**
-     * Произвести слияние результатов с выбранной функцией.
+     * Perform step.
      */
     private void performUnion(BaseUnionable<ResultType, PointType> unionable,
                               List<PointType> selectedPoints,
@@ -85,8 +109,9 @@ public abstract class BaseDynamicAlgorithm<ResultType, PointType extends Abstrac
     }
 
     /**
-     * Получение списка промежуточных рпезультатов по списку
-     * идентификаторов в том же порядке.
+     * Get intermediate results by its identifiers honoring order.
+     * If there is no result for some point (does not filled yet or not exist),
+     * so {@code null} is returned at corresponding list position.
      */
     private List<ResultType> getInnerResults(List<PointType> points) {
         return points.stream()
@@ -97,7 +122,7 @@ public abstract class BaseDynamicAlgorithm<ResultType, PointType extends Abstrac
     }
 
     /**
-     * Класс для хранения промежуточных результатов.
+     * Intermediate result holder.
      */
     public class ResultHolder {
         public final ResultType data;

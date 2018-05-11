@@ -1,5 +1,8 @@
 package com.tsarev.githint.algorithms.base;
 
+/**
+ * Unionable with saved id.
+ */
 public abstract class IndentifiableUnionable<ResultType, PointType extends AbstractPoint<PointType>>
         implements BaseUnionable<ResultType, PointType> {
 

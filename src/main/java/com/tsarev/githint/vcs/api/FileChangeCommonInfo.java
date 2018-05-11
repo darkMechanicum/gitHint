@@ -33,7 +33,7 @@ public class FileChangeCommonInfo {
     }
 
     /**
-     * Возможные типы изменения.
+     * Possible change type.
      */
     public enum ChangeType {
         CHANGED,
@@ -42,7 +42,7 @@ public class FileChangeCommonInfo {
         DELETED;
 
         /**
-         * Конвертация из предложенного в {@link com.intellij.openapi.vcs} перечисления.
+         * Type conversion from {@link com.intellij.openapi.vcs}.
          */
         public static FileChangeCommonInfo.ChangeType fromIdeaType(Change.Type type) {
             switch (type) {

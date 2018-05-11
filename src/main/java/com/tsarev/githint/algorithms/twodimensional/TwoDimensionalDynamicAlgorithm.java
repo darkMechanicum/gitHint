@@ -11,7 +11,7 @@ import java.util.NoSuchElementException;
 import java.util.function.Function;
 
 /**
- * Базовый класс для реализации динамических алгоритмов над двумерным массивом.
+ * Two dimensional specialization for {@link BaseDynamicAlgorithm}.
  */
 public class TwoDimensionalDynamicAlgorithm<ResultType>
         extends BaseDynamicAlgorithm<ResultType, TwoDimensionalPoint> {

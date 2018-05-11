@@ -3,7 +3,7 @@ package com.tsarev.githint.statistics.common;
 import com.tsarev.githint.statistics.api.EntryData;
 
 /**
- * Перечисление наиболее частых типов статистики.
+ * Most common aggregators enumeration.
  */
 public enum CommonStatTypes {
 

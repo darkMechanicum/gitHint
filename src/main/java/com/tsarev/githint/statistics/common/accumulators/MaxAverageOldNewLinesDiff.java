@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Агрегатор статистики для полчения автора с максимальным количеством новых линий.
+ * Statistics aggregator to collect authors, who made maximum new lines in average.
  */
 public class MaxAverageOldNewLinesDiff implements StatAccumulator<CommonStatTypes, NumberData> {
 

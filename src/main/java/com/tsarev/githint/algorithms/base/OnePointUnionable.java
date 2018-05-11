@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * Базовый шаг алгоритма с двумя относительными точками
- * и проверокой, которая принимает текущую точку в каестве аргумента.
+ * Base algorithm step with one relative point precondition
+ * and one external precondition.
  */
 public final class OnePointUnionable<ResultType, PointerType extends AbstractPoint<PointerType>>
         extends IndentifiableUnionable<ResultType,PointerType> {

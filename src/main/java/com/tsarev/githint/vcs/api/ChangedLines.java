@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Описание изменения файла по блокам.
+ * File changes, bound to lines.
  */
 public class ChangedLines {
 
@@ -24,7 +24,7 @@ public class ChangedLines {
     }
 
     /**
-     * Один блок изменений в файле.
+     * One changed block description.
      */
     public static class ChangedLineBlock {
 

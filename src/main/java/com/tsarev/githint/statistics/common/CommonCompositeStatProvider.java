@@ -117,9 +117,10 @@ public class CommonCompositeStatProvider implements FileStatisticsProvider<Commo
     }
 
     /**
-     * Регистрация нового агрегатора.
+     * Aggregator registration.
      *
-     * @return {@code true}, если новый агрегатор успешно зарегистрирован
+     * @return {@code true}, if new aggregator is registered, {@code false} if
+     * otherwise (more likely aggregator key already present)
      */
     public boolean register(CommonStatTypes aggregatorType,
                             Supplier<StatAccumulator<CommonStatTypes, ?>> aggregatorConstructor) {
