@@ -2,19 +2,19 @@ package com.tsarev.githint.common;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 /**
  * <p>
- * Naive and exception/concurrent unsafe list proxy to implement some swing model.
+ * Naive and exception/concurrent unsafe list proxy to implement listener pattern.
  * No iterator elements modification supported.
  * </p>
  * <p>
  * Useful, when iterator or concurrent modifications are not needed.
  * </p>
+ *
+ * @param <DataT> type of elements
+ * @param <ModelT> type of model, which is notified
  */
 public abstract class ObservableListProxy<DataT, ModelT> implements List<DataT> {
 

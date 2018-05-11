@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -12,7 +13,7 @@ import java.util.function.Function;
 /**
  * Class to observe list modifications and notify {@link TableModel} row notifications.
  */
-public class TableModelListProxy<T> extends ObservableListProxy<T, AbstractTableModel> implements TableModel {
+public class TableModelArrayListProxy<T> extends ObservableListProxy<T, AbstractTableModel> implements TableModel {
 
     /**
      * Inner table model, linked with this list.
@@ -40,18 +41,28 @@ public class TableModelListProxy<T> extends ObservableListProxy<T, AbstractTable
     private final Function<Integer, String> columnNames;
 
     /**
-     * Constructor.
+     * Public constructor.
+     */
+    public TableModelArrayListProxy(int columnCount,
+                                    BiFunction<T, Integer, Object> rowElements,
+                                    Function<Integer, Class<?>> columnClasses,
+                                    Function<Integer, String> columnNames) {
+        this(new ArrayList<>(), columnCount, rowElements, columnClasses, columnNames);
+    }
+
+    /**
+     * Private constructor.
      *
      * @param innerCollection proxied modifiable collection
      * @param rowElements function to get element from row
      * @param columnClasses function to get column class
      * @param columnNames function to get column name
      */
-    public TableModelListProxy(List<T> innerCollection,
-                               int columnCount,
-                               BiFunction<T, Integer, Object> rowElements,
-                               Function<Integer, Class<?>> columnClasses,
-                               Function<Integer, String> columnNames) {
+    private TableModelArrayListProxy(List<T> innerCollection,
+                                    int columnCount,
+                                    BiFunction<T, Integer, Object> rowElements,
+                                    Function<Integer, Class<?>> columnClasses,
+                                    Function<Integer, String> columnNames) {
         super(innerCollection,
                 AbstractTableModel::fireTableRowsInserted,
                 AbstractTableModel::fireTableRowsDeleted,
@@ -63,17 +74,17 @@ public class TableModelListProxy<T> extends ObservableListProxy<T, AbstractTable
         this.innerModel = new AbstractTableModel() {
             @Override
             public int getRowCount() {
-                return TableModelListProxy.this.size();
+                return TableModelArrayListProxy.this.size();
             }
 
             @Override
             public int getColumnCount() {
-                return TableModelListProxy.this.columnCount;
+                return TableModelArrayListProxy.this.columnCount;
             }
 
             @Override
             public Object getValueAt(int rowIndex, int columnIndex) {
-                return TableModelListProxy.this.rowElements.apply(TableModelListProxy.this.get(rowIndex), columnIndex);
+                return TableModelArrayListProxy.this.rowElements.apply(TableModelArrayListProxy.this.get(rowIndex), columnIndex);
             }
         };
     }
@@ -81,7 +92,7 @@ public class TableModelListProxy<T> extends ObservableListProxy<T, AbstractTable
     @NotNull
     @Override
     public List<T> subList(int fromIndex, int toIndex) {
-        return new TableModelListProxy<>(
+        return new TableModelArrayListProxy<>(
                 innerSubList(fromIndex, toIndex),
                 columnCount,
                 rowElements,

@@ -1,5 +1,6 @@
 package com.tsarev.githint.statistics.common;
 
+import com.tsarev.githint.statistics.api.EntryData;
 import com.tsarev.githint.statistics.api.FileStatisticsProvider;
 import com.tsarev.githint.statistics.api.OverallStat;
 import com.tsarev.githint.statistics.api.StatEntry;
@@ -29,9 +30,9 @@ public class CommonCompositeStatProvider implements FileStatisticsProvider<Commo
 
     /** {@inheritDoc} */
     @Override
-    public <DataT> StatEntry<CommonStatTypes, DataT> getStatFor(Class<DataT> dataClass,
-                                                                CommonStatTypes statType,
-                                                                ChangedFileContent changed) {
+    public <DataT extends EntryData> StatEntry<CommonStatTypes, DataT> getStatFor(Class<DataT> dataClass,
+                                                                                  CommonStatTypes statType,
+                                                                                  ChangedFileContent changed) {
         StatAccumulator<CommonStatTypes, DataT> accumulator = constructAccumulator(dataClass, statType);
         accumulator.addData(changed);
         return accumulator.getStat();
@@ -39,9 +40,9 @@ public class CommonCompositeStatProvider implements FileStatisticsProvider<Commo
 
     /** {@inheritDoc} */
     @Override
-    public <DataT> StatEntry<CommonStatTypes, DataT> getStatFor(Class<DataT> dataClass,
-                                                                CommonStatTypes statType,
-                                                                List<ChangedFileContent> changed) {
+    public <DataT extends EntryData> StatEntry<CommonStatTypes, DataT> getStatFor(Class<DataT> dataClass,
+                                                                                  CommonStatTypes statType,
+                                                                                  List<ChangedFileContent> changed) {
         StatAccumulator<CommonStatTypes, DataT> accumulator = constructAccumulator(dataClass, statType);
         addAllToAccumulator(accumulator, changed);
         return accumulator.getStat();
@@ -49,9 +50,9 @@ public class CommonCompositeStatProvider implements FileStatisticsProvider<Commo
 
     /** {@inheritDoc} */
     @Override
-    public <DataT> StatEntry<CommonStatTypes, DataT> getStatFor(Class<DataT> dataClass,
-                                                                CommonStatTypes statType,
-                                                                Stream<ChangedFileContent> changed) {
+    public <DataT extends EntryData> StatEntry<CommonStatTypes, DataT> getStatFor(Class<DataT> dataClass,
+                                                                                  CommonStatTypes statType,
+                                                                                  Stream<ChangedFileContent> changed) {
         StatAccumulator<CommonStatTypes, DataT> accumulator = constructAccumulator(dataClass, statType);
         // TODO [790658] [08.05.2018] [Aleksandr.Tsarev] Change accumulator to fit Stream API.
         changed.reduce((o, current) -> {accumulator.addData(current); return o;});
@@ -90,7 +91,7 @@ public class CommonCompositeStatProvider implements FileStatisticsProvider<Commo
     /**
      * Add all contents to accumulator.
      */
-    private <DataT> void addAllToAccumulator(StatAccumulator<CommonStatTypes, DataT> accumulator,
+    private <DataT extends EntryData> void addAllToAccumulator(StatAccumulator<CommonStatTypes, DataT> accumulator,
                                              List<ChangedFileContent> changed) {
         for (ChangedFileContent content : changed) {
             accumulator.addData(content);
@@ -100,7 +101,7 @@ public class CommonCompositeStatProvider implements FileStatisticsProvider<Commo
     /**
      * Instantiate stat accumulator.
      */
-    private <DataT> StatAccumulator<CommonStatTypes, DataT> constructAccumulator(Class<DataT> dataClass,
+    private <DataT extends EntryData> StatAccumulator<CommonStatTypes, DataT> constructAccumulator(Class<DataT> dataClass,
                                                                                  CommonStatTypes statType) {
         Supplier<StatAccumulator<CommonStatTypes, ?>> constructor = statConstructors.get(statType);
         if (constructor == null) {

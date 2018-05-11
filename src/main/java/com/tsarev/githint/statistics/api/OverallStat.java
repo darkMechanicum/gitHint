@@ -16,7 +16,7 @@ public class OverallStat<KeyT> {
         this.stats = stats;
     }
 
-    public <DataT> StatEntry<KeyT, DataT> getStatFor(KeyT statKey, Class<DataT> dataClass) {
+    public <DataT extends EntryData> StatEntry<KeyT, DataT> getStatFor(KeyT statKey, Class<DataT> dataClass) {
         // TODO add check.
         return (StatEntry<KeyT, DataT>) stats.get(statKey);
     }

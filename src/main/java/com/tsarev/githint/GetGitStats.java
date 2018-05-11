@@ -9,8 +9,10 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentManager;
-import com.tsarev.githint.common.TableModelListProxy;
-import com.tsarev.githint.ui.ListViewable;
+import com.tsarev.githint.common.TableModelArrayListProxy;
+import com.tsarev.githint.statistics.api.EntryData;
+import com.tsarev.githint.statistics.common.CommonStatTypes;
+import com.tsarev.githint.ui.TabViewable;
 import com.tsarev.githint.ui.StatListToolWindow;
 import com.tsarev.githint.ui.StatListToolboxTab;
 import com.tsarev.githint.vcs.api.FileChangeInfoProvider;
@@ -18,9 +20,7 @@ import com.tsarev.githint.vcs.common.SimpleDiffProvider;
 import com.tsarev.githint.vcs.git.GitFileChangeInfoProvider;
 import com.tsarev.githint.vcs.git.GitHistoryProvider;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public class GetGitStats extends AnAction {
 
@@ -39,18 +39,19 @@ public class GetGitStats extends AnAction {
         SimpleDiffProvider diffProvider = new SimpleDiffProvider();
         FileChangeInfoProvider changeInfoProvider = new GitFileChangeInfoProvider(diffProvider);
 
-        Collection<ListViewable> viewableStats = BasicStatManager.collectCommonStats(
+        Collection<TabViewable> viewableStats = BasicStatManager.collectCommonStats(
                 project,
                 currentFile,
                 changeInfoProvider,
                 gitHistoryProvider
         );
 
-        TableModelListProxy<ListViewable> viewedData = new TableModelListProxy<>(
-                new ArrayList<>(),
+        Class<?>[] columnsClasses = {CommonStatTypes.class, Collection.class, EntryData.class};
+
+        TableModelArrayListProxy<TabViewable> viewedData = new TableModelArrayListProxy<>(
                 3,
-                ListViewable::getColumnContent,
-                (index) -> Object.class,
+                TabViewable::getColumnContent,
+                (index) -> columnsClasses[index],
                 (index) -> "hello");
 
         ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(StatListToolWindow.ID);

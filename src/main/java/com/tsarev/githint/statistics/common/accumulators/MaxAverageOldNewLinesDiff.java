@@ -2,6 +2,7 @@ package com.tsarev.githint.statistics.common.accumulators;
 
 import com.tsarev.githint.statistics.api.StatEntry;
 import com.tsarev.githint.statistics.common.CommonStatTypes;
+import com.tsarev.githint.statistics.common.NumberData;
 import com.tsarev.githint.statistics.common.StatAccumulator;
 import com.tsarev.githint.vcs.api.ChangedFileContent;
 import com.tsarev.githint.vcs.api.ChangedLines;
@@ -14,7 +15,7 @@ import java.util.Map;
 /**
  * Агрегатор статистики для полчения автора с максимальным количеством новых линий.
  */
-public class MaxAverageOldNewLinesDiff implements StatAccumulator<CommonStatTypes, Long> {
+public class MaxAverageOldNewLinesDiff implements StatAccumulator<CommonStatTypes, NumberData> {
 
     /**
      * Old new diff aggregation table.
@@ -46,7 +47,7 @@ public class MaxAverageOldNewLinesDiff implements StatAccumulator<CommonStatType
 
     /** {@inheritDoc} */
     @Override
-    public StatEntry<CommonStatTypes, Long> getStat() {
+    public StatEntry<CommonStatTypes, NumberData> getStat() {
         Collection<String> maxNewLinesAuthors = new ArrayList<>();
         long maxAvg = -1;
         for (String author : agregation.keySet()) {
@@ -59,7 +60,7 @@ public class MaxAverageOldNewLinesDiff implements StatAccumulator<CommonStatType
                 maxNewLinesAuthors.add(author);
             }
         }
-        return new StatEntry<>(getKey(), maxNewLinesAuthors, maxAvg);
+        return new StatEntry<>(getKey(), maxNewLinesAuthors, new NumberData(maxAvg));
     }
 
     /** {@inheritDoc} */

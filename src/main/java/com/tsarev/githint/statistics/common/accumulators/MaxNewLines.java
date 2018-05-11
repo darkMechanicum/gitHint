@@ -2,6 +2,7 @@ package com.tsarev.githint.statistics.common.accumulators;
 
 import com.tsarev.githint.statistics.api.StatEntry;
 import com.tsarev.githint.statistics.common.CommonStatTypes;
+import com.tsarev.githint.statistics.common.NumberData;
 import com.tsarev.githint.statistics.common.StatAccumulator;
 import com.tsarev.githint.vcs.api.ChangedFileContent;
 import com.tsarev.githint.vcs.api.ChangedLines;
@@ -14,7 +15,7 @@ import java.util.Map;
 /**
  * Агрегатор статистики для полчения автора с максимальным количеством новых линий.
  */
-public class MaxNewLines implements StatAccumulator<CommonStatTypes, Long> {
+public class MaxNewLines implements StatAccumulator<CommonStatTypes, NumberData> {
 
     /**
      * Таблица с количеством изменений для каждого автора.
@@ -37,7 +38,7 @@ public class MaxNewLines implements StatAccumulator<CommonStatTypes, Long> {
 
     /** {@inheritDoc} */
     @Override
-    public StatEntry<CommonStatTypes, Long> getStat() {
+    public StatEntry<CommonStatTypes, NumberData> getStat() {
         Collection<String> maxNewLinesAuthors = null;
         long maxNewLines = -1;
         for (Map.Entry<String, Long> aggregateEntry : agregation.entrySet()) {
@@ -54,7 +55,7 @@ public class MaxNewLines implements StatAccumulator<CommonStatTypes, Long> {
                 maxNewLinesAuthors.add(maxCandidateAuthor);
             }
         }
-        return new StatEntry<>(getKey(), maxNewLinesAuthors, maxNewLines);
+        return new StatEntry<>(getKey(), maxNewLinesAuthors, new NumberData(maxNewLines));
     }
 
     /** {@inheritDoc} */

@@ -20,24 +20,24 @@ public interface FileStatisticsProvider<KeyT> {
     /**
      * Get statistics for one file.
      */
-    <DataT> StatEntry<KeyT, DataT> getStatFor(Class<DataT> dataClass,
-                                              KeyT statType,
-                                              ChangedFileContent changed);
+    <DataT extends EntryData> StatEntry<KeyT, DataT> getStatFor(Class<DataT> dataClass,
+                                                                KeyT statType,
+                                                                ChangedFileContent changed);
 
     /**
      * Get statistics for changed content list.
      */
-    <DataT> StatEntry<KeyT, DataT> getStatFor(Class<DataT> dataClass,
-                                              KeyT statType,
-                                              List<ChangedFileContent> changed);
+    <DataT extends EntryData> StatEntry<KeyT, DataT> getStatFor(Class<DataT> dataClass,
+                                                                KeyT statType,
+                                                                List<ChangedFileContent> changed);
 
     /**
      * Get statistics for changed content stream.
      * Terminates the stream.
      */
-    <DataT> StatEntry<KeyT, DataT> getStatFor(Class<DataT> dataClass,
-                                              KeyT statType,
-                                              Stream<ChangedFileContent> changed);
+    <DataT extends EntryData> StatEntry<KeyT, DataT> getStatFor(Class<DataT> dataClass,
+                                                                KeyT statType,
+                                                                Stream<ChangedFileContent> changed);
 
     /**
      * Get all registered statistics for changed content list.

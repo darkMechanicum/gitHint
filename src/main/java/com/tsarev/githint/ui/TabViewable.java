@@ -1,9 +1,9 @@
 package com.tsarev.githint.ui;
 
 /**
- * Something, that can be viewed as list element.
+ * Something, that can be viewed at tab statistics.
  */
-public interface ListViewable {
+public interface TabViewable {
 
     /**
      * Column number.
@@ -13,5 +13,5 @@ public interface ListViewable {
     /**
      * Get content for column.
      */
-    String getColumnContent(int columnIndex);
+    Object getColumnContent(int columnIndex);
 }

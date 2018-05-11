@@ -7,7 +7,7 @@ import java.util.Collections;
 /**
  * Запись о статистике.
  */
-public class StatEntry<KeyT, DataT> {
+public class StatEntry<KeyT, DataT extends EntryData> {
 
     /**
      * Ключ записи.
