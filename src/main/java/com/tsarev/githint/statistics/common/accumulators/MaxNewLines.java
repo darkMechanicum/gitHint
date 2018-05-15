@@ -46,6 +46,7 @@ public class MaxNewLines implements StatAccumulator<CommonStatTypes, NumberData>
             String maxCandidateAuthor = aggregateEntry.getKey();
             if (maxNewLinesAuthors == null || maxNewLines == -1) {
                 maxNewLinesAuthors = new ArrayList<>();
+                maxNewLinesAuthors.add(maxCandidateAuthor);
                 maxNewLines = maxCandidateValue;
             } else if (maxNewLines == maxCandidateValue) {
                 maxNewLinesAuthors.add(maxCandidateAuthor);

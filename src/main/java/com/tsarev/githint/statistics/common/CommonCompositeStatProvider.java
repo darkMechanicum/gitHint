@@ -74,7 +74,7 @@ public class CommonCompositeStatProvider implements FileStatisticsProvider<Commo
                 .collect(Collectors.toList());
 
         // TODO [442657] [08.05.2018] [Aleksandr.Tsarev] Change accumulator to fit Stream API.
-        changed.reduce((o, current) -> {
+        changed.reduce(null, (o, current) -> {
             accumulators.forEach(acc -> acc.addData(current));
             return o;
         });

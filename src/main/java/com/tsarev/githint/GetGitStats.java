@@ -17,8 +17,8 @@ import com.tsarev.githint.ui.StatListToolWindow;
 import com.tsarev.githint.ui.StatListToolboxTab;
 import com.tsarev.githint.vcs.api.FileChangeInfoProvider;
 import com.tsarev.githint.vcs.common.SimpleDiffProvider;
-import com.tsarev.githint.vcs.git.GitFileChangeInfoProvider;
-import com.tsarev.githint.vcs.git.GitHistoryProvider;
+import com.tsarev.githint.vcs.git.idea.GitHistoryProvider;
+import com.tsarev.githint.vcs.git.jgit.JGitFileChangeInfoProvider;
 
 import java.util.Collection;
 
@@ -37,7 +37,7 @@ public class GetGitStats extends AnAction {
 
         GitHistoryProvider gitHistoryProvider = new GitHistoryProvider();
         SimpleDiffProvider diffProvider = new SimpleDiffProvider();
-        FileChangeInfoProvider changeInfoProvider = new GitFileChangeInfoProvider(diffProvider);
+        FileChangeInfoProvider changeInfoProvider = new JGitFileChangeInfoProvider(diffProvider);
 
         Collection<TabViewable> viewableStats = BasicStatManager.collectCommonStats(
                 project,

@@ -1,4 +1,4 @@
-package com.tsarev.githint.vcs.git;
+package com.tsarev.githint.vcs.git.idea;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.FilePath;
